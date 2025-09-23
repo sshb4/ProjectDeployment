@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧳 Travel Memory Log</title>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧳 Travel Memory Log</h1>
+            <p>Capture and cherish your travel adventures</p>
+        </div>
+
+        <div class="main-content">
+            <div class="form-section">
+                <h2>📝 Add New Memory</h2>
+                <form id="memoryForm">
+                    <div class="form-group">
+                        <label for="travelMemory">Share your travel experience:</label>
+                        <textarea 
+                            id="travelMemory" 
+                            name="message" 
+                            class="form-control" 
+                            placeholder="Where did you go? What did you see, eat, or experience? How did it make you feel? Share the details of your adventure..."
+                            required
+                            maxlength="2000"
+                        ></textarea>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            <span id="charCount">0</span>/2000 characters
+                        </small>
+                    </div>
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span>📍 Log Memory</span>
+                    </button>
+                </form>
+                <div id="statusMessage"></div>
+            </div>
+
+            <div class="messages-section">
+                <h2>🗺️ Travel Memories <span id="memoryCount">(0)</span></h2>
+                <div id="messagesContainer" class="messages-container">
+                    <div class="loading" id="loadingState">
+                        Loading your travel memories...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = '';  // Empty string uses same origin
+        
+        // DOM Elements
+        const memoryForm = document.getElementById('memoryForm');
+        const memoryTextarea = document.getElementById('travelMemory');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const memoryCount = document.getElementById('memoryCount');
+        const charCount = document.getElementById('charCount');
+
+        // Character counter
+        memoryTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = count;
+            
+            if (count > 1900) {
+                charCount.style.color = '#f44336';
+            } else if (count > 1500) {
+                charCount.style.color = '#ff9800';
+            } else {
+                charCount.style.color = '#666';
+            }
+        });
+
+        // Show status message
+        function showStatus(message, type = 'info') {
+            statusMessage.innerHTML = `<div class="${type}-message">${message}</div>`;
+            setTimeout(() => {
+                statusMessage.innerHTML = '';
+            }, 5000);
+        }
+
+        // Load and display messages
+        async function loadMessages() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/messages`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const messages = await response.json();
+                displayMessages(messages);
+                
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                messagesContainer.innerHTML = `
+                    <div class="error-message">
+                        ❌ Failed to load travel memories. Please check your connection and try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Display messages in the UI
+        function displayMessages(messages) {
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <p><strong>No travel memories yet!</strong></p>
+                        <p>Start by adding your first adventure to the left.</p>
+                    </div>
+                `;
+                memoryCount.textContent = '(0)';
+                return;
+            }
+
+            // Sort messages by timestamp (newest first)
+            const sortedMessages = [...messages].reverse();
+            
+            const messagesHTML = sortedMessages.map(message => `
+                <div class="message-card">
+                    <div class="message-content">${escapeHtml(message.message)}</div>
+                    <div class="message-meta">
+                        <span class="message-id">#${message.id}</span>
+                        <span class="message-date">${message.created_at || 'Unknown date'}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            messagesContainer.innerHTML = messagesHTML;
+            memoryCount.textContent = `(${messages.length})`;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Submit new memory
+        async function submitMemory(messageContent) {
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>📤 Saving...</span>';
+
+                const response = await fetch(`${API_BASE_URL}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: messageContent })
+                });
+
+                if (response.status === 201) {
+                    showStatus('✅ Travel memory saved successfully!', 'success');
+                    memoryForm.reset();
+                    charCount.textContent = '0';
+                    charCount.style.color = '#666';
+                    
+                    // Reload messages to show the new one
+                    await loadMessages();
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Server error: ${response.status}`);
+                }
+
+            } catch (error) {
+                console.error('Error submitting memory:', error);
+                showStatus(`❌ Failed to save memory: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>📍 Log Memory</span>';
+            }
+        }
+
+        // Form submission handler
+        memoryForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const messageContent = memoryTextarea.value.trim();
+            
+            if (!messageContent) {
+                showStatus('❌ Please enter your travel memory before submitting.', 'error');
+                memoryTextarea.focus();
+                return;
+            }
+
+            if (messageContent.length > 2000) {
+                showStatus('❌ Travel memory is too long. Please keep it under 2000 characters.', 'error');
+                return;
+            }
+
+            await submitMemory(messageContent);
+        });
+
+        // Keyboard shortcuts
+        memoryTextarea.addEventListener('keydown', function(e) {
+            // Ctrl+Enter or Cmd+Enter to submit
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                memoryForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Auto-resize textarea
+        memoryTextarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+        });
+
+        // Load messages when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMessages();
+            memoryTextarea.focus();
+        });
+
+        // Refresh messages every 30 seconds
+        setInterval(loadMessages, 30000);
+    </script>
+</body>
+</html>
