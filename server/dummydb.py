@@ -27,13 +27,20 @@ class DummyDB:
             with open(self.filename, 'w') as f:
                 json.dump([], f)
 
+    def readAllRecords(self):
+        self.cursor.execute("SELECT * FROM schedule")
+        rows = self
+        all = []
+        for row in rows:
+            d = dict_factory(self.cursor, row)
+            all.append(d)
+        print("the rows are", all)
+        return all
+
     def saveRecord(self, record):
         all = self.readAllRecords()
         all.append(record)
         with open(self.filename, 'w') as f:
             json.dump(all, f)
 
-    def readAllRecords(self):
-        with open(self.filename, 'r') as f:
-            return json.load(f)
 
