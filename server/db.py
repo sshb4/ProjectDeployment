@@ -1,5 +1,6 @@
 import sqlite3
 
+#from in class
 def dict_factory(cursor, row):
     fields = []
     # Extract column names from cursor description
@@ -20,6 +21,8 @@ class DB:
         self.cursor = self.connection.cursor()
 
     def readAllRecords(self):
+        self.connection.row_factory = dict_factory
+        self.cursor = self.connection.cursor()
         self.cursor.execute("SELECT * FROM schedule")
         return self.cursor.fetchall()
         print("the rows are", rows)
@@ -28,8 +31,27 @@ class DB:
         self.cursor.execute("INSERT INTO schedule (type, code, layman, semester) VALUES (?, ?, ?, ?)", record)
         self.connection.commit()
 
+    #from in class
+    def editRecord(self, id, d):
+        data = (d["type"], d["code"], d["layman"], d["semester"], id)
+        self.cursor.execute("UPDATE schedule SET type = ?, code = ?, layman = ?, semester = ? WHERE id = ?", data)
+        self.connection.commit()
+
+    def deletRecord(self, record_id):
+        self.cursor.execute("DELETE FROM schedule WHERE id = ?", (record_id,))
+        self.connection.commit()
+
     def close(self):
         self.connection.close()
 
     
 if __name__ == "__main__":
+    db = DB("classes.db") #try
+    db.cursor.execute('''CREATE TABLE IF NOT EXISTS schedule
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      type TEXT,
+                      code TEXT,
+                      layman TEXT,
+                      semester TEXT)''')
+    db.connection.commit()
+    db.close()

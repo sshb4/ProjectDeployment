@@ -3,52 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧳 Travel Memory Log</title>
+    <title>Class Schedule Tracker</title>
     <link rel="stylesheet" href="styles.css">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Travel Memory Log</h1>
-            <p>Capture your travel adventures</p>
-        </div>
-
-        <div class="main-content">
-            <div class="form-section">
-                <h2>Add New Memory</h2>
-                <form id="memoryForm">
-                    <div class="form-group">
-                        <label for="travelMemory">Share your travel experience:</label>
-                        <textarea 
-                            id="travelMemory" 
-                            name="message" 
-                            class="form-control" 
-                            placeholder="Where did you go? What did you see, eat, or experience? How did it make you feel? Share the details of your adventure..."
-                            required
-                            maxlength="2000"
-                        ></textarea>
-                            <span id="charCount">0</span>/2000 characters
-                        </small>
-                    </div>
-                    <button type="submit" class="submit-btn" id="submitBtn">
-                        <span>📍 Log Memory</span>
-                    </button>
-                </form>
-                <div id="statusMessage"></div>
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <span class="school-icon">📚</span>
+                    Class Schedule Tracker
+                    <span class="school-icon">�</span>
+                </h1>
+                <p class="subtitle">Keep track of your courses and academic schedule</p>
             </div>
+        </header>
 
-            <div class="messages-section">
-                <h2>Travel Memories <span id="memoryCount">(0)</span></h2>
-                <div id="messagesContainer" class="messages-container">
-                    <div class="loading" id="loadingState">
-                        Loading your travel memories...
-                    </div>
+        <main class="main-content">
+            <!-- Course Input Form -->
+            <section class="course-form-section">
+                <div class="form-container">
+                    <h2>Add a New Course</h2>
+                    <form id="courseForm" class="course-form">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="courseType" class="input-label">Course Type</label>
+                                <input type="text" id="courseType" name="type" placeholder="e.g., CS, MATH, HIST" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="courseCode" class="input-label">Course Code</label>
+                                <input type="number" id="courseCode" name="code" placeholder="e.g., 3200" required min="1000" max="9999">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="courseName" class="input-label">Course Name</label>
+                                <input type="text" id="courseName" name="name" placeholder="e.g., Web App Development" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="semester" class="input-label">Semester</label>
+                                <select id="semester" name="semester" required>
+                                    <option value="">Select semester...</option>
+                                    <option value="FA25">Fall 2025</option>
+                                    <option value="SP26">Spring 2026</option>
+                                    <option value="SU26">Summer 2026</option>
+                                    <option value="FA26">Fall 2026</option>
+                                    <option value="SP27">Spring 2027</option>                                   
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <span class="btn-text">Add Course</span>
+                            <span class="btn-icon">➕</span>
+                        </button>
+                    </form>
                 </div>
+            </section>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Adding course to your schedule...</p>
             </div>
-        </div>
+
+            <!-- Success/Error Messages -->
+            <div id="messageAlert" class="alert" style="display: none;"></div>
+
+            <!-- Course Schedule List -->
+            <section class="schedule-section">
+                <div class="schedule-header">
+                    <h2>Your Course Schedule</h2>
+                </div>
+                <!-- Course List -->
+                <div id="coursesList" class="courses-list"></div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Class Schedule Tracker</p>
+        </footer>
     </div>
 
-    
+    <script src="app.js"></script>
 </body>
 </html>
