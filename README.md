@@ -1,8 +1,5 @@
 //written with help from chat
 
-# Class Schedule Tracker
-
-A small Flask + vanilla JS project for tracking class schedules.
 
 ## Overview
 
@@ -11,24 +8,11 @@ A small Flask + vanilla JS project for tracking class schedules.
 
 ## Quick start
 
-1. Create and activate a Python virtual environment:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+1. Create and activate a Python virtual environment
 
 2. Install Python deps:
 
-```bash
-pip install -r server/requirements.txt
-```
-
-If you don't have a `requirements.txt`, install directly:
-
-```bash
-pip install flask flask-cors
-```
+requirements.txt
 
 3. Start the server:
 

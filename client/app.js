@@ -1,5 +1,7 @@
 console.log("Loading schedule"); //make sure its even running
 
+const API_BASE_URL = 'http://localhost:5000';
+
 // from in class to be updated for my own use
 function do_edit(classData) {
     console.log("Editing class:", classData)
@@ -15,7 +17,7 @@ function do_edit(classData) {
 async function do_delete(class_id) {
     console.log("Deleting class with ID:", class_id)
     try {
-        const response = await fetch(`http://localhost:5000/schedule/${class_id}`, {
+        const response = await fetch(`${API_BASE_URL}/schedule/${class_id}`, {
             method: 'DELETE',
         });
         if (response.ok) {
@@ -44,7 +46,7 @@ let editID = null;
 
 // Fetch and display all classes
 function load_schedule() {
-    fetch('http://localhost:5000/schedule')
+    fetch(`${API_BASE_URL}/schedule`)
         .then(response => response.json())
         .then(data => {
             const coursesList = document.getElementById('coursesList');
@@ -97,10 +99,10 @@ function addNewClass(classData) {
 
     const button_text = document.querySelector('#submitBtn').innerHTML;
     let submit_method = 'POST';
-    let url = 'http://localhost:5000/schedule';
+    let url = `${API_BASE_URL}/schedule`;
     if (button_text === 'SAVE' && editID) {
         submit_method = 'PUT';
-        url = 'http://localhost:5000/schedule/' + editID;
+        url = `${API_BASE_URL}/schedule/${editID}`;
     }
 
     fetch(url, {
