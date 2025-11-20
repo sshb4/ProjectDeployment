@@ -26,6 +26,34 @@ def load_session_data():
     g.session_data = session_data
 
 
+#new preflight
+
+@app.before_request
+def before_request_function():
+    if request.method == "OPTIONS":
+        response.app.response_class("", status=204)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+    load_session_data()
+
+@app.after_request
+def after_request_func(response):
+    if request.method == "OPTIONS":
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+    load_session_data()
+
+@app.route("/session/settings", methods=["OPTIONS"])
+def setFavoriteColor():
+    load_session_data()
+    color = request.form["color"]
+    g.session_data["fav_color"] = color
+    return "Color Saved", 200, {"Access-Control-Allow-Origin" : "*"}
+
 @app.route("/classes", methods=["GET"])
 def get_classes():
     db = DB("classes.db")
