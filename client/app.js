@@ -1,3 +1,83 @@
+console.log("connected")
+let button = documents.querySelector("#save");
+button.onclick = process_color
+let inputPicker = document.querySelector("#colorPicker");
+
+let delbutton = document.querySelector("#del");
+delbutton.onclick = delete_session
+
+function delete_session () {
+    fetch("http://localhost:8000/sessions", {
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            //add something
+            "Authorization": authorizationHeader()
+        },
+        method: "DELETE"
+    })
+    .then(function (response) {
+        //dont set this until we get results from the fetch request
+
+        document.body.style.backgroundColor = "#FFFFFF";
+    })
+}
+
+function process_color() {
+    console.log("Clicked the button")
+
+    let data = "color=" + encodeURIComponent(inputPicker.value);
+    fetch("http://localhost:8000/sessions/settings", {
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            //add something
+            "Authorization": authorizationHeader()
+        },
+        method: "PUT",
+        body: data
+    })
+    .then(function (response) {
+        console.log("The response is ", response.text());
+        //dont set this until we get results from the fetch request
+        console.log(inputPicker.value);
+        document.body.style.backgroundColor = inputPicker.value;
+    })
+}
+
+function authorizationHeader() {
+    let sessionID = localStorage.getItem("sessionID");
+    if (sessionID) {
+        console.log("Found session ID in the auth header");
+        //return 'Bearer ${sessionID}';
+        return "Bearer " + sessionID;
+    } else {
+        return null
+    }
+}
+
+function createSessionID() {
+    fetch("http://localhost:8000/sessions", {
+        headers: {
+            "Authorization": authorizationHeader()
+        },
+    })
+    .then(function (response) {
+        if (response.status == 200) {
+            response.json().then(function (session) {
+                localStorage.setItem("sessionID", session_id);
+        if (session.data.fav_color) {
+            inputPicker.value = session.data.fav_color;
+            document.body.style.backgroundColor = session.data.fav_color;
+        }
+        })
+    }
+    })
+}
+
+createSessionID();
+
+
+{/* Additional Code in app.js 
+
 function showSuccess(messgae = "Success!") {
     var successDiv = document.getElementById("success-message");
     successDiv.innerText = messgae;
@@ -214,4 +294,4 @@ window.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#reset-button')?.addEventListener('click', reset_form);
 });
 
-
+*/}

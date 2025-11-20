@@ -1,3 +1,106 @@
+from flask import Flask, request, jsonify #add jsonify
+from db import DB 
+
+from passlib.hash import bcrypt
+from session_store import SessionStore
+from flask import g
+
+app = Flask(__name__)
+session_store = SessionStore()
+
+def load_session_data():
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        session_id = auth_header.removeprefix('Bearer ')
+    else:
+        session_id = None
+    
+    if session_id:
+        session_data = session_store.get_session_data(session_id)
+        print("the session data is", session_data)
+    if session_id == None or session_data = None:
+        session_id = session_store.create_session()
+        session_data = session_store.get_session_data(session_id)
+
+    g.session_id = session_id
+    g.session_data = session_data
+
+
+@app.route("/classes", methods=["GET"])
+def get_classes():
+    db = DB("classes.db")
+    myclass = db.readAllRecords()
+    return myclass, {"Access-Control-Allow-Origin":"*"}
+
+@app.route("/schedule/<int:class_id>", methods=["DELETE"])
+def delete_schedule_item(class_id):
+    print(f"Deleting from DB: id={class_id}")
+    db = DB("classes.db")
+    db.deletRecord(class_id)
+    return "Class deleted successfully", 200, {"Access-Control-Allow-Origin" : "*"}
+
+
+
+@app.route("/classes/<int:class_id>", methods=["PUT"])
+def update_class(class_id):
+    db = DB("classes.db")
+    d = request.get_json()
+    db.editRecord(class_id, d)
+    return "Class updated successfully", 200, {"Access-Control-Allow-Origin" : "*"}
+
+@app.route("/schedule", methods=["POST"])
+def create_schedule_item():
+    db = DB("classes.db")
+    record = (
+        request.form.get("type"),
+        request.form.get("code"),
+        request.form.get("layman"),
+        request.form.get("semester")
+    )
+    db.saveRecord(record)
+    return "Class updated successfully", 201, {"Access-Control-Allow-Origin" : "*"}
+
+@app.route("/schedule", methods=["GET"])
+def get_schedule():
+    # Replace with your actual DB logic
+    db = DB("classes.db")
+    schedule = db.readAllRecords()
+    return jsonify(schedule)
+
+@app.route("/schedule/<int:class_id>", methods=["PUT"])
+def update_schedule_item(class_id):
+    db = DB("classes.db")
+    d = {
+        "type": request.form.get("type"),
+        "code": request.form.get("code"),
+        "layman": request.form.get("layman"),
+        "semester": request.form.get("semester")
+    }
+    db.editRecord(class_id, d)
+    return {"message": "Class updated successfully"}, 200
+
+
+def run():
+    app.run(port=8080, host="0.0.0.0")
+
+if __name__ == "__main__":
+    run()
+
+
+
+
+
+""""video:
+
+@app.route("/session/settings", methods=["PUT"])
+def setFavoriteColor():
+    load_session_data()
+    color = request.form["color"]
+    g.session_data["favorite_color"] = color
+    return "Color Saved", 200, {"Access-Control-Allow-Origin" : "*"}  
+
+
+in class:
 from flask import Flask, request
 
 
@@ -47,71 +150,4 @@ def deleteSessionData():
         return "Deleted", 200, {"Access-Control-Allow-Origin" : "*"}
 
 @app.route()
-
-
-
-from flask import Flask, request, jsonify #add jsonify
-from db import DB
-
-from flask_cors import CORS
-
-app = Flask(__name__)
-CORS(app)
-
-
-@app.route("/classes", methods=["GET"])
-def get_classes():
-    db = DB("classes.db")
-    trails = db.readAllRecords()
-    return trails, {"Access-Control-Allow-Origin":"*"}
-
-@app.route("/schedule/<int:class_id>", methods=["DELETE"])
-def delete_schedule_item(class_id):
-    print(f"Deleting from DB: id={class_id}")
-    db = DB("classes.db")
-    db.deletRecord(class_id)
-    return {"message": "Class deleted successfully"}, 200
-
-
-
-@app.route("/classes/<int:class_id>", methods=["PUT"])
-def update_class(class_id):
-    db = DB("classes.db")
-    d = request.get_json()
-    db.editRecord(class_id, d)
-    return {"message": "Class updated successfully"}, 200
-
-@app.route("/schedule", methods=["POST"])
-def create_schedule_item():
-    db = DB("classes.db")
-    record = (
-        request.form.get("type"),
-        request.form.get("code"),
-        request.form.get("layman"),
-        request.form.get("semester")
-    )
-    db.saveRecord(record)
-    return {"message": "Class added successfully"}, 201
-
-@app.route("/schedule", methods=["GET"])
-def get_schedule():
-    # Replace with your actual DB logic
-    db = DB("classes.db")
-    schedule = db.readAllRecords()
-    return jsonify(schedule)
-
-@app.route("/schedule/<int:class_id>", methods=["PUT"])
-def update_schedule_item(class_id):
-    db = DB("classes.db")
-    d = {
-        "type": request.form.get("type"),
-        "code": request.form.get("code"),
-        "layman": request.form.get("layman"),
-        "semester": request.form.get("semester")
-    }
-    db.editRecord(class_id, d)
-    return {"message": "Class updated successfully"}, 200
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+"""
