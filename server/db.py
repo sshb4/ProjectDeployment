@@ -1,13 +1,5 @@
-
-
-def validatePassword(self, email, password):
-    stored_password = self.getUserPasswordByEmaikl(email)
-    if stored_password is not None:
-        
-
-
-
 import sqlite3
+import bcrypt
 
 #from in class
 def dict_factory(cursor, row):
@@ -22,6 +14,7 @@ def dict_factory(cursor, row):
         result_dict[fields[i]] = row[i]
 
     return result_dict
+        
 
 class DB:
     def __init__(self, dbfilenmae):
@@ -36,31 +29,50 @@ class DB:
         return self.cursor.fetchall()
         print("the rows are", rows)
 
-    def saveRecord(self, record):
-        self.cursor.execute("INSERT INTO schedule (type, code, layman, semester) VALUES (?, ?, ?, ?)", record)
-        self.connection.commit()
-
-    #from in class
     def editRecord(self, id, d):
         data = (d["type"], d["code"], d["layman"], d["semester"], id)
         self.cursor.execute("UPDATE schedule SET type = ?, code = ?, layman = ?, semester = ? WHERE id = ?", data)
         self.connection.commit()
 
-    def deletRecord(self, record_id):
+    def deleteRecord(self, record_id):
         self.cursor.execute("DELETE FROM schedule WHERE id = ?", (record_id,))
         self.connection.commit()
+
+    def getUserPasswordByEmail(self, email):
+        self.cursor.execute("SELECT password FROM users WHERE email = ?", (email,))
+        row = self.cursor.fetchone()
+        print(f"Returning the user {row}")
+        return row
+
+    def saveUser(self, record):
+        plaintext_password = record["password"]
+        encrypted_password = bcrypt.hash(plaintext_password)
+        data = [record["first_name"], record["last_name"], record["email"], encrypted_password]
+        self.cursor.execute("INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)", data)
+        self.connection.commit()
+
+    def saveRecord(self, record):
+        data = [record["type"], record["code"], record["layman"], record["semester"]]
+        self.cursor.execute("INSERT INTO schedule (type, code, layman, semester) VALUES (?, ?, ?, ?)", record)
+        self.connection.commit()
+
+    def validatePassword(self, email, password):
+        stored_password = self.getUserPasswordByEmail(email)
+        if stored_password is not None:
+            if bcrypt.verify(password, stored_password[0]):
+                print("Valid")
+                return True
+        return False
 
     def close(self):
         self.connection.close()
 
     
+
+    
 if __name__ == "__main__":
-    db = DB("classes.db") #try
-    db.cursor.execute('''CREATE TABLE IF NOT EXISTS schedule
-                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                      type TEXT,
-                      code TEXT,
-                      layman TEXT,
-                      semester TEXT)''')
-    db.connection.commit()
+    db = DB("classes.db") 
+    db.readAllRecords()
+    db.saveRecord(1)
+    db.readAllRecords()
     db.close()

@@ -1,10 +1,155 @@
 console.log("connected")
+
+const classes_div = document.querySelector("#coursesList");
+let editID = null;
+
 let button = documents.querySelector("#save");
 button.onclick = process_color
 let inputPicker = document.querySelector("#colorPicker");
 
 let delbutton = document.querySelector("#del");
 delbutton.onclick = delete_session
+
+function load() {
+    if (!isLoggedIn()) {
+        alert("You must be logged in to access this page.");
+        return
+    }
+    classes_div.innerHTML = "";
+    reset_form()
+    fetch("http://localhost:5000/classes")
+        .then(function (response) {
+            response.json()
+            .then(function (data) {
+                console.log(data);
+                data.forEach(trail => load_trails(trail))
+            })
+        })
+}
+
+function load_classes(classData) {
+    let article = document.createElement("article");
+    let lhs = document.createElement("div");
+    lhs.classList.add("article-lhs");
+    let rhs = document.createElement("div");
+    rhs.classList.add("article-rhs");
+    let h3 = document.createElement("h3");
+    let p = document.createElement("p");
+    p.classList.add("audiowide-regular");
+    let p2 = document.createElement("p");
+    let delButton = document.createElement("i");
+    delButton.classList.add("fa-solid, fa-trash");
+    let editButton = document.createElement("i");
+    editButton.classList.add("fa-solid, fa-edit");
+
+    delButton.onclick = function () {
+        doDelete(classData.id);
+    }
+    
+    editButton.onclick = function () {
+        doEdit(classData);
+    }
+
+    classes_div.append(article);
+    article.append(lhs);
+    article.append(rhs);
+    lhs.append(h3);
+    lhs.append(p);
+    rhs.append(p2);
+    rhs.append(editButton);
+    rhs.append(delButton);
+
+    h3.innerText = "Class: " + classData.layman;
+    p.innerText = "Code: " + classData.type + " " + classData.code;
+    p2.innerText = "Semester: " + classData.semester;
+}
+
+function showSuccess(message = "Success!") {
+    const successmodal = document.querySelector("#success-modal");
+    successmodal.querySelector(".success-conent").textContent = message;
+    successmodal.style.display = "flex";
+
+    successmodal.classList.add("show");
+
+    setTimeout(() => {
+        successmodal.classList.remove("show");
+
+        setTimeout(() => successmodal.style.display = "none", 400);
+    }, 2000);
+}
+
+function do_edit(classData) {
+    console.log("You're editing:", class_id)
+    modal.style.display = "flex";
+    document.querySelector('#class_input_layman').value = classData.layman;
+    document.querySelector('#class_input_type').value = classData.type;
+    document.querySelector('#class_input_code').value = classData.code;
+    document.querySelector('#class_input_semester').value = classData.semester;
+    document.querySelector('#submitBtn').innerHTML = 'SAVE';
+    editID = classData.id;
+
+}
+
+function do_delete(class_id) {
+    if (!isLoggedIn()) {
+        alert("You must be logged in to access this page.");
+        return
+    }
+    console.log("Deleting class:", class_id);
+    fetch(`http://localhost:5000/classes/${class_id}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+
+    })
+    .then(function (response) {
+            console.log("Deleted")
+            load();
+    })
+}
+
+function addNewClass(classData) {
+    if (!isLoggedIn()) {
+        alert("You must be logged in to access this page.");
+        return
+    }
+    let name = classData.layman;
+    let type = classData.type;
+    let code = classData.code;
+    let semester = classData.semester;
+    console.log("Adding new class:", name, type, code, semester);
+    let data = "layman=" + encodeURIComponent(name);
+    data += "&type=" + encodeURIComponent(type);
+    data += "&code=" + encodeURIComponent(code);
+    data += "&semester=" + encodeURIComponent(semester);
+
+    //
+
+    let endpoint = "http://localhost:5000/classes";
+    let method = "POST";
+    if (editID) {
+        endpoint += `/${editID}`;
+        method = "PUT";
+    }
+
+    fetch(endpoint, {
+        method: method,
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: data
+    })
+    .then(function (response) {
+        console.log("Added new class");
+        reset_form();
+        load();
+        editID = null;
+        document.querySelector('#submitBtn').innerHTML = 'Submit';
+        showSuccess("Class added successfully!");
+    })
+}
+
 
 function delete_session () {
     fetch("http://localhost:8000/sessions", {
@@ -73,28 +218,74 @@ function createSessionID() {
     })
 }
 
+{/*}
+function registerUser() {
+    let fname = document.querySelector("#first-name").value;
+    let lname = document.querySelector("#last-name").value;
+    let email = document.querySelector("#email").value;
+    let password = document.querySelector("#password").value;
+
+    let data = {
+
+    fetch(url, {
+        method: submit_method,
+        body: data,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+
+    openBtn.addEventListener('click', () => ) {
+      modal.style.display = 'block';
+} */} 
+
 //authentication
 function loginUser() {
     console.log("Log in here");
+    //form elements, convert to values
     let login_email = document.querySelector("#login-email").value;
     let login_password = document.querySelector("#login-password").value;
-    console.log(login_email, login_password);
+    console.log("Your email is " + login_email + " your password is " + login_password);
 
-    
+    //convert form values to data string
+    var data = "email=" + encodeURIComponent(login_email);
+    data += "&password=" + encodeURIComponent(login_password);
 
-    fetch
-
-    //set a cookie
-
-    //call load func
+    //endpoint
+    fetch("http://localhost:5000/sessions/auth", {
+        body: data,
+        method: "POST",
+        headers: {
+            "Authorization": authorizationHeader(),
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+    })
+    .then(function (response) {
+        return response.json().then(function (data) {
+            console.log("The data is ", data);
+            if (response.status == 200) {
+                localStorage.setItem("sessionID", data.session_id);
+                showSuccess("Logged in");
+                loginModal.style.display = "none";
+                load();
+            } else {
+                loginModal.style.display = "none";
+                alert("Unable to sign in")
+            }
+        });
+    })
 
     //catch error
     .catch(function (error) {
-        console.log("Error during login:", error);
+        alert("Error: " + error.message);
     });
 }
 
 createSessionID();
+
+closeUserBtn.addEventListener("click", () => {
+    userModal.style.display = "none";
+});
 
 
 {/* Additional Code in app.js 
@@ -112,25 +303,7 @@ function doDelete(id) {
     if (!isloggedIn)
 }
 
-function registerUser() {
-    let fname = document.querySelector("#first-name").value;
-    let lname = document.querySelector("#last-name").value;
-    let email = document.querySelector("#email").value;
-    let password = document.querySelector("#password").value;
 
-    let data = {
-
-    fetch(url, {
-        method: submit_method,
-        body: data,
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-
-openBtn.addEventListener('click', () => ) {
-    modal.style.display = 'block';
-}
 
 
 function load() {
@@ -154,36 +327,6 @@ console.log("Loading schedule"); //make sure its even running
 
 const API_BASE_URL = 'http://localhost:5000';
 
-// from in class to be updated for my own use
-function do_edit(classData) {
-    console.log("Editing class:", classData)
-    document.querySelector('#courseType').value = classData.type
-    document.querySelector('#courseCode').value = classData.code
-    document.querySelector('#courseName').value = classData.layman
-    document.querySelector('#semester').value = classData.semester
-    document.querySelector('#submitBtn').innerHTML = 'SAVE';
-    editID = classData.id;
-}
-
-// Delete class
-async function do_delete(class_id) {
-    console.log("Deleting class with ID:", class_id)
-    try {
-        const response = await fetch(`${API_BASE_URL}/schedule/${class_id}`, {
-            method: 'DELETE',
-        });
-        if (response.ok) {
-            load_schedule();
-            reset_form();
-        } else {
-            // Remove false error alert, just reload
-            load_schedule();
-            reset_form();
-        }
-    } catch (err) {
-        console.error('Error deleting class:', err);
-    }
-}
 
 
 function reset_form() {   
@@ -196,87 +339,7 @@ function reset_form() {
 
 let editID = null;
 
-// Fetch and display all classes
-function load_schedule() {
-    fetch(`${API_BASE_URL}/schedule`)
-        .then(response => response.json())
-        .then(data => {
-            const coursesList = document.getElementById('coursesList');
-            coursesList.innerHTML = '';
-            data.forEach(classData => {
-                const card = document.createElement('div');
-                card.className = 'course-card';
-                card.innerHTML = `
-                    <div class="course-header">
-                        <div class="course-title">${classData.layman}</div>
-                        <div class="course-code">${classData.type} ${classData.code}</div>
-                    </div>
-                    <div class="course-details">
-                        <div class="course-detail"><strong>Semester:</strong> ${classData.semester}</div>
-                        <div class="course-detail"><strong>ID:</strong> ${classData.id}</div>
-                    </div>
-                    <button class="edit-btn">Edit</button>
-                    <button class="delete-btn">Delete</button>
-                `;
-                // Edit button
-                card.querySelector('.edit-btn').addEventListener('click', function() {
-                    do_edit(classData);
-                });
-                // Delete button
-                card.querySelector('.delete-btn').addEventListener('click', function() {
-                    if (confirm('Delete this class?')) {
-                        do_delete(classData.id);
-                    }
-                });
-                coursesList.appendChild(card);
-            });
-        })
-        .catch(err => {
-            console.error('Error loading schedule:', err);
-        });
-}
 
-
-
-function addNewClass(classData) {
-    console.log("CAN YOU SEE ME?");
-    // Build data string for x-www-form-urlencoded
-    let data = "type=" + encodeURIComponent(classData.type) + //encodeURIcomponent replaces chars that cause issues
-        "&code=" + encodeURIComponent(classData.code) +
-        "&layman=" + encodeURIComponent(classData.layman) +
-        "&semester=" + encodeURIComponent(classData.semester);
-
-    console.log("The name is ", classData.layman);
-    console.log("The data is ", data);
-
-    const button_text = document.querySelector('#submitBtn').innerHTML;
-    let submit_method = 'POST';
-    let url = `${API_BASE_URL}/schedule`;
-    if (button_text === 'SAVE' && editID) {
-        submit_method = 'PUT';
-        url = `${API_BASE_URL}/schedule/${editID}`;
-    }
-
-    fetch(url, {
-        method: submit_method,
-        body: data,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    })
-    .then(function(response) {
-        if (response.ok) {
-            console.log("Saved new class:", response);
-            load_schedule();
-            reset_form();
-        } else {
-            alert('Failed to save class');
-        }
-    })
-    .catch(function(err) {
-        console.error('Error saving class:', err);
-    });
-}
 
 
 
