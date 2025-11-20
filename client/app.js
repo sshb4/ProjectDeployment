@@ -491,8 +491,38 @@ window.addEventListener('DOMContentLoaded', function() {
             signUpModal.style.display = 'none';
         }
     });
+
+    // Theme toggle functionality
+    const themeToggleBtn = document.querySelector('#themeToggle');
+    if (themeToggleBtn) {
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('colorTheme') || 'red';
+        applyTheme(savedTheme);
+        
+        themeToggleBtn.addEventListener('click', function() {
+            const currentTheme = document.body.classList.contains('blue-theme') ? 'blue' : 'red';
+            const newTheme = currentTheme === 'red' ? 'blue' : 'red';
+            applyTheme(newTheme);
+            localStorage.setItem('colorTheme', newTheme);
+        });
+    }
 });
 
+function applyTheme(theme) {
+    const themeToggleBtn = document.querySelector('#themeToggle');
+    
+    if (theme === 'blue') {
+        document.body.classList.add('blue-theme');
+        if (themeToggleBtn) {
+            themeToggleBtn.innerHTML = '🔴 Switch to Red Theme';
+        }
+    } else {
+        document.body.classList.remove('blue-theme');
+        if (themeToggleBtn) {
+            themeToggleBtn.innerHTML = '🔵 Switch to Blue Theme';
+        }
+    }
+}
 
 function isLoggedIn() {
     var session = localStorage.getItem('sessionID');

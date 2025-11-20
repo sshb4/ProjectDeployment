@@ -10,7 +10,7 @@ body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
     color: #1a365d;
-    background: #e3f2fd;
+    background: #dbeafe;
     min-height: 100vh;
     padding: 20px;
 }
@@ -18,11 +18,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    background: white;
     padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15);
-    border: 3px solid #2563eb;
 }
 
 /* Header */
@@ -94,6 +90,30 @@ body {
     border-color: #2563eb;
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+}
+
+/* Theme Toggle */
+.theme-toggle-section {
+    margin-top: 15px;
+}
+
+.theme-toggle-btn {
+    background: linear-gradient(145deg, #6366f1, #4f46e5);
+    color: white;
+    border: 2px solid #312e81;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.theme-toggle-btn:hover {
+    background: linear-gradient(145deg, #4f46e5, #3730a3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
 }
 
 /* Forms */
@@ -290,7 +310,6 @@ article {
     text-align: center;
     margin-top: 40px;
     padding: 25px;
-    border-top: 4px solid #2563eb;
     background: linear-gradient(135deg, #dbeafe, #bfdbfe);
     color: #1e40af;
     font-weight: bold;
@@ -1057,4 +1076,55 @@ textarea.form-control {
         padding: 20px;
         width: 95%;
     }
+}
+
+/* Blue Theme Overrides */
+body.blue-theme {
+    background: #fef2f2;
+}
+
+.blue-theme .header {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+}
+
+.blue-theme .auth-btn {
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
+    border-color: #dc2626;
+}
+
+.blue-theme .auth-btn:hover {
+    background: linear-gradient(145deg, #dc2626, #b91c1c);
+    border-color: #2563eb;
+}
+
+.blue-theme .submit-btn {
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
+    border-color: #dc2626;
+}
+
+.blue-theme .submit-btn:hover {
+    background: linear-gradient(145deg, #dc2626, #b91c1c);
+    border-color: #2563eb;
+}
+
+.blue-theme .delete-btn {
+    background: #dc2626;
+    border-color: #991b1b;
+}
+
+.blue-theme .delete-btn:hover {
+    background: #991b1b;
+}
+
+.blue-theme .edit-btn {
+    background: #2563eb;
+    border-color: #1d4ed8;
+}
+
+.blue-theme .edit-btn:hover {
+    background: #1d4ed8;
+}
+
+.blue-theme article {
+    border-color: #dc2626;
 }
