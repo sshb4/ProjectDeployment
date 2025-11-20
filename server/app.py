@@ -7,6 +7,24 @@ from flask import g
 app = Flask(__name__)
 session_store = SessionStore()
 
+#added to make it work
+@app.route("/")
+def home():
+    return {
+        "message": "Authentication Flask API is running",
+        "endpoints": [
+            "/classes (GET, PUT)",
+            "/schedule (POST, DELETE)",
+            "/users (POST)",
+            "/sessions/auth (POST)",
+            "/sessions (GET, DELETE)"
+        ]
+    }, 200, {"Access-Control-Allow-Origin": "*"}
+
+@app.route("/favicon.ico")
+def favicon():
+    return "", 204
+
 
 """
 @app.route("/session/settings", methods=["OPTIONS"])
@@ -19,8 +37,14 @@ def setFavoriteColor():
 
 @app.route("/classes", methods=["GET"])
 def get_classes():
+    # Check if user is authenticated
+    if 'user_email' not in g.session_data:
+        return "Unauthorized", 401, {"Access-Control-Allow-Origin":"*"}
+    
+    user_email = g.session_data['user_email']
     db = DB("classes.db")
-    myclass = db.readAllRecords()
+    myclass = db.readUserRecords(user_email)
+    db.close()
     return myclass, {"Access-Control-Allow-Origin":"*"}
 
 @app.route("/classes", methods=["PUT"])
@@ -40,22 +64,49 @@ def update_class(class_id):
 def delete_schedule_item(class_id):
     print(f"Deleting from DB ", class_id)
     db = DB("classes.db")
-    db.deletRecord(class_id)
+    db.deleteRecord(class_id)
+    return "Class deleted successfully", 200, {"Access-Control-Allow-Origin" : "*"}
+
+@app.route("/classes/<class_id>", methods=["DELETE"])
+def delete_class_item(class_id):
+    # Check if user is authenticated
+    if 'user_email' not in g.session_data:
+        return "Unauthorized", 401, {"Access-Control-Allow-Origin" : "*"}
+    
+    user_email = g.session_data['user_email']
+    db = DB("classes.db")
+    
+    # Check if the class belongs to the current user
+    class_owner = db.getClassOwner(class_id)
+    if class_owner != user_email:
+        db.close()
+        return "Forbidden - You can only delete your own classes", 403, {"Access-Control-Allow-Origin" : "*"}
+    
+    print(f"Deleting class from DB with ID: ", class_id)
+    db.deleteRecord(class_id)
+    db.close()
     return "Class deleted successfully", 200, {"Access-Control-Allow-Origin" : "*"}
 
 @app.route("/schedule", methods=["POST"])
 def create_schedule_item():
+    # Check if user is authenticated
+    if 'user_email' not in g.session_data:
+        return "Unauthorized", 401, {"Access-Control-Allow-Origin" : "*"}
+    
+    user_email = g.session_data['user_email']
     db = DB("classes.db")
     print(request.form)
     d = {"type": request.form["type"],
             "code": request.form["code"],
             "layman": request.form["layman"],
-            "semester": request.form["semester"]
+            "semester": request.form["semester"],
+            "user_email": user_email
          } 
     db.saveRecord(d)
+    db.close()
     return "Class updated successfully", 201, {"Access-Control-Allow-Origin" : "*"}
 
-@app.route("users", methods=["POST"])
+@app.route("/users", methods=["POST"])
 def create_user():
     db = DB("classes.db")
     print(request.form)
@@ -105,32 +156,41 @@ def before_request_function():
 
 @app.after_request
 def after_request_func(response):
-    if request.method == "OPTIONS":
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        return response
-    load_session_data()
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
 
 
 @app.route("/sessions/auth", methods=["POST"])
 def validateUser():
-    email = request.form["email"]
-    password = request.form["password"]
-    print(f"the email is {email} the password is {password}")
+    try:
+        email = request.form["email"]
+        password = request.form["password"]
+        print(f"the email is {email} the password is {password}")
 
-    t = DB('classes.db')
-    valid = t.validatePassword(email, password)
-    if valid:
-        g.session_data["user_email"] = email
-        print("I just set the g.sessiondata to ", g.session_data)
+        t = DB('classes.db')
+        valid = t.validatePassword(email, password)
+        if valid:
+            g.session_data["user_email"] = email
+            print("I just set the g.sessiondata to ", g.session_data)
+            return {
+                "msg":"Valid email",
+                "id": g.session_id
+            }, 200, {
+                "Access-Control-Allow-Origin" : "*"}
+        else:
+            return {
+                "msg": f"Invalid login for {email}",
+                "error": "authentication_failed"
+            }, 401, {
+                "Access-Control-Allow-Origin" : "*"}
+    except Exception as e:
+        print(f"Authentication error: {e}")
         return {
-            "msg":"Valid email",
-            "id": g.session_id
-        }, 200, {
-            "Access-Control-Allow-Origin" : "*"}
-    else:
-        return "Invalid login {email}", 401, {
+            "msg": "Authentication error",
+            "error": str(e)
+        }, 500, {
             "Access-Control-Allow-Origin" : "*"}
     
 @app.route("/sessions", methods=["DELETE"])

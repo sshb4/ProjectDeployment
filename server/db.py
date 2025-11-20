@@ -29,6 +29,18 @@ class DB:
         return self.cursor.fetchall()
         print("the rows are", rows)
 
+#for specific person's records
+    def readUserRecords(self, user_email):
+        self.connection.row_factory = dict_factory
+        self.cursor = self.connection.cursor()
+        self.cursor.execute("SELECT * FROM schedule WHERE user_email = ?", (user_email,))
+        return self.cursor.fetchall()
+
+    def getClassOwner(self, class_id):
+        self.cursor.execute("SELECT user_email FROM schedule WHERE id = ?", (class_id,))
+        result = self.cursor.fetchone()
+        return result[0] if result else None
+
     def editRecord(self, id, d):
         data = (d["type"], d["code"], d["layman"], d["semester"], id)
         self.cursor.execute("UPDATE schedule SET type = ?, code = ?, layman = ?, semester = ? WHERE id = ?", data)
@@ -46,20 +58,20 @@ class DB:
 
     def saveUser(self, record):
         plaintext_password = record["password"]
-        encrypted_password = bcrypt.hash(plaintext_password)
+        encrypted_password = bcrypt.hashpw(plaintext_password.encode('utf-8'), bcrypt.gensalt())
         data = [record["first_name"], record["last_name"], record["email"], encrypted_password]
         self.cursor.execute("INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)", data)
         self.connection.commit()
 
     def saveRecord(self, record):
-        data = [record["type"], record["code"], record["layman"], record["semester"]]
-        self.cursor.execute("INSERT INTO schedule (type, code, layman, semester) VALUES (?, ?, ?, ?)", record)
+        data = [record["type"], record["code"], record["layman"], record["semester"], record["user_email"]]
+        self.cursor.execute("INSERT INTO schedule (type, code, layman, semester, user_email) VALUES (?, ?, ?, ?, ?)", data)
         self.connection.commit()
 
     def validatePassword(self, email, password):
         stored_password = self.getUserPasswordByEmail(email)
         if stored_password is not None:
-            if bcrypt.verify(password, stored_password[0]):
+            if bcrypt.checkpw(password.encode('utf-8'), stored_password[0]):
                 print("Valid")
                 return True
         return False
