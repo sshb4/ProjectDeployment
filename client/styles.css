@@ -1,30 +1,4 @@
-/*styled with AI*/
-
-:root {
-    --primary-color: #3b82f6;
-    --primary-dark: #1e40af;
-    --accent-color: #f59e0b;
-    --accent-light: #fef3c7;
-    --success-color: #10b981;
-    --error-color: #ef4444;
-    --warning-color: #f59e0b;
-    
-    --text-primary: #1f2937;
-    --text-secondary: #6b7280;
-    --text-light: #9ca3af;
-    
-    --bg-primary: #ffffff;
-    --bg-secondary: #f9fafb;
-    --bg-card: #ffffff;
-    --border-color: #e5e7eb;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    
-    --border-radius: 12px;
-    --border-radius-sm: 8px;
-    --transition: all 0.2s ease;
-}
+/* Red, White, and Blue Theme - No Gradients */
 
 * {
     margin: 0;
@@ -33,20 +7,304 @@
 }
 
 body {
-    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: Arial, sans-serif;
     line-height: 1.6;
-    color: var(--text-primary);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #1a365d;
+    background: #e3f2fd;
     min-height: 100vh;
+    padding: 20px;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-    min-height: 100vh;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15);
+    border: 3px solid #2563eb;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%);
+    border-radius: 12px;
+    border: 3px solid #2563eb;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.2);
+}
+
+.title {
+    font-size: 2.5rem;
+    color: white;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+    color: #fee2e2;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* Auth buttons */
+.auth-section {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.auth-btn {
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
+    color: white;
+    border: 3px solid #dc2626;
+    padding: 15px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.auth-btn:hover::before {
+    left: 100%;
+}
+
+.auth-btn:hover {
+    background: linear-gradient(145deg, #dc2626, #b91c1c);
+    border-color: #2563eb;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+}
+
+/* Forms */
+.form-container {
+    margin: 25px 0;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid #3b82f6;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+}
+
+.course-form {
+    display: grid;
+    gap: 15px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.input-group {
     display: flex;
     flex-direction: column;
+}
+
+.input-label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #1a365d;
+}
+
+input, select {
+    padding: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.submit-btn {
+    background: linear-gradient(145deg, #10b981, #059669);
+    color: white;
+    border: 3px solid #dc2626;
+    padding: 16px 40px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 15px;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background: linear-gradient(145deg, #dc2626, #b91c1c);
+    border-color: #10b981;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+}
+
+/* Action buttons for course items */
+.delete-btn, .edit-btn {
+    background: #dc2626;
+    color: white;
+    border: 2px solid #991b1b;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.edit-btn {
+    background: #2563eb;
+    border-color: #1d4ed8;
+}
+
+.delete-btn:hover {
+    background: #991b1b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.edit-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+/* Course item layout */
+article {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin: 15px 0;
+    background: white;
+    border: 2px solid #2563eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);
+}
+
+.article-lhs {
+    flex-grow: 1;
+}
+
+.article-rhs {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.article-lhs h3 {
+    color: #dc2626;
+    font-size: 1.3em;
+    margin-bottom: 5px;
+}
+
+.article-lhs p {
+    color: #1a365d;
+    margin: 2px 0;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white !important;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    margin: 15% auto;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    border: 3px solid #2563eb;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.close {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #dc2626;
+}
+
+.close:hover {
+    color: #2563eb;
+}
+
+/* Course list */
+.courses-list {
+    margin-top: 25px;
+}
+
+.course-item {
+    background: linear-gradient(135deg, #fef2f2, #fecaca);
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 12px;
+    border-left: 6px solid #dc2626;
+    border-right: 6px solid #2563eb;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.course-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 25px;
+    border-top: 4px solid #2563eb;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+    font-weight: bold;
+    width: 100%;
+    position: relative;
+    left: 0;
+    right: 0;
+}
+
+/* Logo styling (if you add one) */
+.logo {
+    max-height: 50px;
+    margin-right: 10px;
+    vertical-align: middle;
 }
 
 /* Header Styles */
@@ -695,5 +953,108 @@ textarea.form-control {
     .container {
         margin: 10px;
         border-radius: 12px;
+    }
+}
+
+/* Authentication Styles */
+.auth-section {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.auth-btn {
+    padding: 8px 16px;
+    background: rgba(59, 130, 246, 0.8);
+    color: white;
+    border: 2px solid rgba(59, 130, 246, 1);
+    border-radius: var(--border-radius-sm);
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-btn:hover {
+    background: rgba(59, 130, 246, 1);
+    border-color: rgba(59, 130, 246, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    color: var(--text-light);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.close:hover {
+    color: var(--text-primary);
+}
+
+.login-form {
+    margin-top: 20px;
+}
+
+.login-form .input-group {
+    margin-bottom: 20px;
+}
+
+.login-form h2 {
+    text-align: center;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Responsive modal */
+@media (max-width: 480px) {
+    .modal-content {
+        margin: 20% auto;
+        padding: 20px;
+        width: 95%;
     }
 }

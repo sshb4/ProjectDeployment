@@ -47,9 +47,21 @@ def get_classes():
     db.close()
     return myclass, {"Access-Control-Allow-Origin":"*"}
 
-@app.route("/classes", methods=["PUT"])
+@app.route("/classes/<class_id>", methods=["PUT"])
 def update_class(class_id):
+    # Check if user is authenticated
+    if 'user_email' not in g.session_data:
+        return "Unauthorized", 401, {"Access-Control-Allow-Origin" : "*"}
+    
+    user_email = g.session_data['user_email']
     db = DB("classes.db")
+    
+    # Check if the class belongs to the current user
+    class_owner = db.getClassOwner(class_id)
+    if class_owner != user_email:
+        db.close()
+        return "Forbidden - You can only edit your own classes", 403, {"Access-Control-Allow-Origin" : "*"}
+    
     print(request.form)
     d = {
         "type": request.form.get("type"),
@@ -58,6 +70,7 @@ def update_class(class_id):
         "semester": request.form.get("semester")
     }
     db.editRecord(class_id, d)
+    db.close()
     return "Class edited successfully", 200, {"Access-Control-Allow-Origin" : "*"}
 
 @app.route("/schedule", methods=["DELETE"])

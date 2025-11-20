@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Schedule Tracker</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,14 +14,76 @@
     <div class="container">
         <header class="header">
             <div class="header-content">
+                <img src="utut.png" alt="UTUT Logo" class="logo">
                 <h1 class="title">
-                    <span class="school-icon">📚</span>
-                    Class Schedule Tracker
-                    <span class="school-icon">�</span>
+                    Class Schedule
                 </h1>
-                <p class="subtitle">Keep track of your courses and academic schedule</p>
+                <p class="subtitle">Keep track of your courses</p>
+                <div class="auth-section">
+                    <button id="signUpBtn" class="auth-btn">Sign Up</button>
+                    <button id="loginBtn" class="auth-btn">Login</button>
+                    <button id="logoutBtn" class="auth-btn">Logout</button>
+                </div>
             </div>
         </header>
+
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" id="closeLoginBtn">&times;</span>
+                <h2>Login to Your Account</h2>
+                <form id="loginForm" class="login-form">
+                    <div class="input-group">
+                        <label for="login-email" class="input-label">Email</label>
+                        <input type="email" id="login-email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="login-password" class="input-label">Password</label>
+                        <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="button" id="loginSubmitBtn" class="submit-btn">
+                        <span class="btn-text">Login</span>
+                        <span class="btn-icon">🔐</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sign Up Modal -->
+        <div id="signUpModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-btn" onclick="document.getElementById('signUpModal').style.display='none'">&times;</span>
+                <h2>Create Account</h2>
+                <form id="signUpForm">
+                    <div class="form-group">
+                        <label for="signup-first-name" class="input-label">First Name</label>
+                        <input type="text" id="signup-first-name" name="first_name" placeholder="Enter your first name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-last-name" class="input-label">Last Name</label>
+                        <input type="text" id="signup-last-name" name="last_name" placeholder="Enter your last name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-email" class="input-label">Email</label>
+                        <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-password" class="input-label">Password</label>
+                        <input type="password" id="signup-password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="button" id="signUpSubmitBtn" class="submit-btn">
+                        <span class="btn-text">Create Account</span>
+                        <span class="btn-icon">👤</span>
+                    </button>
+                </form>
+            </div>
+        </div>
 
         <main class="main-content">
             <!-- Course Input Form -->
@@ -31,12 +94,12 @@
                         <div class="form-grid">
                             <div class="input-group">
                                 <label for="courseType" class="input-label">Course Type</label>
-                                <input type="text" id="courseType" name="type" placeholder="e.g., CS, MATH, HIST" required>
+                                <input type="text" id="courseType" name="type" placeholder="e.g., SE" required>
                             </div>
                             
                             <div class="input-group">
                                 <label for="courseCode" class="input-label">Course Code</label>
-                                <input type="number" id="courseCode" name="code" placeholder="e.g., 3200" required min="1000" max="9999">
+                                <input type="number" id="courseCode" name="code" placeholder="e.g., 3200" required min="900" max="9999">
                             </div>
                             
                             <div class="input-group">
@@ -74,6 +137,16 @@
             <!-- Success/Error Messages -->
             <div id="messageAlert" class="alert" style="display: none;"></div>
 
+            <!-- Success Modal -->
+            <div id="success-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="document.getElementById('success-modal').style.display='none'">&times;</span>
+                    <h2>Success!</h2>
+                    <p class="success-content"></p>
+                    <button onclick="document.getElementById('success-modal').style.display='none'" class="submit-btn">OK</button>
+                </div>
+            </div>
+
             <!-- Course Schedule List -->
             <section class="schedule-section">
                 <div class="schedule-header">
@@ -83,17 +156,11 @@
                 <div id="coursesList" class="courses-list"></div>
             </section>
         </main>
-
-        <footer class="footer">
-            <p>&copy; 2025 Class Schedule Tracker</p>
-        </footer>
     </div>
 
-    <!--form 
-
-add type: password to be *** on password field-->
-
-
+    <footer class="footer">
+        <p>&copy; 2025 Class Schedule Tracker</p>
+    </footer>
 
     <script src="sessions.js"></script> <!--first over app.js-->
     <script src="app.js"></script>

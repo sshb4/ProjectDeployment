@@ -3,12 +3,25 @@ console.log("connected")
 const classes_div = document.querySelector("#coursesList");
 let editID = null;
 
-let button = documents.querySelector("#save");
-button.onclick = process_color
-let inputPicker = document.querySelector("#colorPicker");
+let button = document.querySelector("#save");
+function delete_session () {
+    fetch("http://localhost:8080/sessions", {
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            //add something
+            "Authorization": authorizationHeader()
+        },
+        method: "DELETE"
+    })
+    .then(function (response) {
+        //dont set this until we get results from the fetch request
+        console.log("Session deleted")
+    })
+}
 
-let delbutton = document.querySelector("#del");
-delbutton.onclick = delete_session
+// Removed unused color picker code
+
+
 
 function load() {
     if (!isLoggedIn()) {
@@ -17,18 +30,24 @@ function load() {
     }
     classes_div.innerHTML = "";
     reset_form()
-    fetch("http://localhost:5000/classes")
+    fetch("http://localhost:8080/classes", {
+        headers: {
+            "Authorization": authorizationHeader()
+        }
+    })
         .then(function (response) {
             response.json()
             .then(function (data) {
-                console.log(data);
-                data.forEach(trail => load_trails(trail))
+                console.log("Loaded classes:", data);
+                // Clear existing classes and load fresh
+                data.forEach(classData => load_classes(classData));
             })
         })
 }
 
 function load_classes(classData) {
     let article = document.createElement("article");
+    article.setAttribute("data-class-id", classData.id); // Add unique identifier
     let lhs = document.createElement("div");
     lhs.classList.add("article-lhs");
     let rhs = document.createElement("div");
@@ -37,17 +56,12 @@ function load_classes(classData) {
     let p = document.createElement("p");
     p.classList.add("audiowide-regular");
     let p2 = document.createElement("p");
-    let delButton = document.createElement("i");
-    delButton.classList.add("fa-solid, fa-trash");
-    let editButton = document.createElement("i");
-    editButton.classList.add("fa-solid, fa-edit");
+    let delButton = document.createElement("button");
+    delButton.classList.add("delete-btn");
+    delButton.textContent = "Delete";
 
     delButton.onclick = function () {
-        doDelete(classData.id);
-    }
-    
-    editButton.onclick = function () {
-        doEdit(classData);
+        do_delete(classData.id);
     }
 
     classes_div.append(article);
@@ -56,7 +70,6 @@ function load_classes(classData) {
     lhs.append(h3);
     lhs.append(p);
     rhs.append(p2);
-    rhs.append(editButton);
     rhs.append(delButton);
 
     h3.innerText = "Class: " + classData.layman;
@@ -66,16 +79,21 @@ function load_classes(classData) {
 
 function showSuccess(message = "Success!") {
     const successmodal = document.querySelector("#success-modal");
-    successmodal.querySelector(".success-conent").textContent = message;
-    successmodal.style.display = "flex";
+    if (successmodal) {
+        const contentElement = successmodal.querySelector(".success-content");
+        if (contentElement) {
+            contentElement.textContent = message;
+            successmodal.style.display = "flex";
 
-    successmodal.classList.add("show");
+            successmodal.classList.add("show");
 
-    setTimeout(() => {
-        successmodal.classList.remove("show");
+            setTimeout(() => {
+                successmodal.classList.remove("show");
 
-        setTimeout(() => successmodal.style.display = "none", 400);
-    }, 2000);
+                setTimeout(() => successmodal.style.display = "none", 400);
+            }, 2000);
+        }
+    }
 }
 
 function do_edit(classData) {
@@ -96,17 +114,33 @@ function do_delete(class_id) {
         return
     }
     console.log("Deleting class:", class_id);
-    fetch(`http://localhost:5000/classes/${class_id}`, {
+    
+    // Add confirmation to prevent accidental deletes
+    if (!confirm(`Are you sure you want to delete this class?`)) {
+        return;
+    }
+    
+    fetch(`http://localhost:8080/classes/${class_id}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": authorizationHeader()
         }
 
     })
     .then(function (response) {
-            console.log("Deleted")
-            load();
+        console.log("Delete response:", response.status);
+        if (response.status === 200) {
+            console.log("Class deleted successfully");
+            load(); // Reload the list
+        } else {
+            alert("Error deleting class");
+        }
     })
+    .catch(function (error) {
+        console.error("Delete error:", error);
+        alert("Error deleting class: " + error.message);
+    });
 }
 
 function addNewClass(classData) {
@@ -126,10 +160,10 @@ function addNewClass(classData) {
 
     //
 
-    let endpoint = "http://localhost:5000/classes";
+    let endpoint = "http://localhost:8080/schedule";
     let method = "POST";
     if (editID) {
-        endpoint += `/${editID}`;
+        endpoint = `http://localhost:8080/classes/${editID}`;
         method = "PUT";
     }
 
@@ -137,6 +171,7 @@ function addNewClass(classData) {
         method: method,
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": authorizationHeader()
         },
         body: data
     })
@@ -152,7 +187,7 @@ function addNewClass(classData) {
 
 
 function delete_session () {
-    fetch("http://localhost:8000/sessions", {
+    fetch("http://localhost:5000/sessions", {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             //add something
@@ -164,27 +199,6 @@ function delete_session () {
         //dont set this until we get results from the fetch request
 
         document.body.style.backgroundColor = "#FFFFFF";
-    })
-}
-
-function process_color() {
-    console.log("Clicked the button")
-
-    let data = "color=" + encodeURIComponent(inputPicker.value);
-    fetch("http://localhost:8000/sessions/settings", {
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            //add something
-            "Authorization": authorizationHeader()
-        },
-        method: "PUT",
-        body: data
-    })
-    .then(function (response) {
-        console.log("The response is ", response.text());
-        //dont set this until we get results from the fetch request
-        console.log(inputPicker.value);
-        document.body.style.backgroundColor = inputPicker.value;
     })
 }
 
@@ -200,7 +214,7 @@ function authorizationHeader() {
 }
 
 function createSessionID() {
-    fetch("http://localhost:8000/sessions", {
+    fetch("http://localhost:8080/sessions", {
         headers: {
             "Authorization": authorizationHeader()
         },
@@ -208,13 +222,9 @@ function createSessionID() {
     .then(function (response) {
         if (response.status == 200) {
             response.json().then(function (session) {
-                localStorage.setItem("sessionID", session_id);
-        if (session.data.fav_color) {
-            inputPicker.value = session.data.fav_color;
-            document.body.style.backgroundColor = session.data.fav_color;
+                localStorage.setItem("sessionID", session.id);
+            })
         }
-        })
-    }
     })
 }
 
@@ -252,7 +262,7 @@ function loginUser() {
     data += "&password=" + encodeURIComponent(login_password);
 
     //endpoint
-    fetch("http://localhost:5000/sessions/auth", {
+    fetch("http://localhost:8080/sessions/auth", {
         body: data,
         method: "POST",
         headers: {
@@ -261,18 +271,46 @@ function loginUser() {
         },
     })
     .then(function (response) {
-        return response.json().then(function (data) {
-            console.log("The data is ", data);
-            if (response.status == 200) {
-                localStorage.setItem("sessionID", data.session_id);
-                showSuccess("Logged in");
-                loginModal.style.display = "none";
-                load();
-            } else {
-                loginModal.style.display = "none";
-                alert("Unable to sign in")
-            }
-        });
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers.get('content-type'));
+        
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json().then(function (data) {
+                console.log("The data is ", data);
+                if (response.status == 200) {
+                    localStorage.setItem("sessionID", data.id);
+                    showSuccess("Logged in successfully");
+                    document.querySelector('#loginModal').style.display = "none";
+                    // Clear login form
+                    document.querySelector("#login-email").value = '';
+                    document.querySelector("#login-password").value = '';
+                    updateAuthUI();
+                    // load() is called by updateAuthUI(), so don't call it again here
+                } else {
+                    document.querySelector('#loginModal').style.display = "none";
+                    // Clear login form on failed login
+                    document.querySelector("#login-email").value = '';
+                    document.querySelector("#login-password").value = '';
+                    alert("Unable to sign in: " + (data.message || 'Invalid credentials'));
+                }
+            });
+        } else {
+            // Handle non-JSON response (likely an error page)
+            return response.text().then(function (text) {
+                console.log("Non-JSON response:", text);
+                document.querySelector('#loginModal').style.display = "none";
+                // Clear login form on error
+                document.querySelector("#login-email").value = '';
+                document.querySelector("#login-password").value = '';
+                if (response.status === 401) {
+                    alert("Invalid email or password");
+                } else {
+                    alert("Server error: " + response.status);
+                }
+            });
+        }
     })
 
     //catch error
@@ -281,72 +319,87 @@ function loginUser() {
     });
 }
 
-createSessionID();
+// Sign up user function
+function signUpUser() {
+    console.log("Sign up here");
+    
+    // Get form values
+    let firstName = document.querySelector("#signup-first-name").value;
+    let lastName = document.querySelector("#signup-last-name").value;
+    let email = document.querySelector("#signup-email").value;
+    let password = document.querySelector("#signup-password").value;
+    
+    console.log(`Creating user: ${firstName} ${lastName} - ${email}`);
 
-closeUserBtn.addEventListener("click", () => {
-    userModal.style.display = "none";
-});
-
-
-{/* Additional Code in app.js 
-
-function showSuccess(messgae = "Success!") {
-    var successDiv = document.getElementById("success-message");
-    successDiv.innerText = messgae;
-    successDiv.style.display = "block";
-    setTimeout(function() {
-        successDiv.style.display = "none";
-    }, 3000);
-}
-
-function doDelete(id) {
-    if (!isloggedIn)
-}
-
-
-
-
-function load() {
-    if (!isloggedIn()) {
-        alert("You must be logged in to access this page.");
-
+    // Validate inputs
+    if (!firstName || !lastName || !email || !password) {
+        alert("Please fill in all fields");
+        return;
     }
+
+    // Convert form values to data string
+    var data = "first_name=" + encodeURIComponent(firstName);
+    data += "&last_name=" + encodeURIComponent(lastName);
+    data += "&email=" + encodeURIComponent(email);
+    data += "&password=" + encodeURIComponent(password);
+
+    // Submit to API
+    fetch("http://localhost:8080/users", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: data
+    })
+    .then(function (response) {
+        console.log("Sign up response status:", response.status);
+        
+        return response.text().then(function (text) {
+            console.log("Sign up response text:", text);
+            
+            if (response.status === 201) {
+                // Success - user created
+                showSuccess("Account created successfully! You can now log in.");
+                document.querySelector('#signUpModal').style.display = "none";
+                
+                // Clear the form
+                document.querySelector("#signup-first-name").value = '';
+                document.querySelector("#signup-last-name").value = '';
+                document.querySelector("#signup-email").value = '';
+                document.querySelector("#signup-password").value = '';
+                
+            } else if (response.status === 200 && text.includes("already exists")) {
+                // Email already exists
+                alert("An account with this email already exists. Please use a different email or try logging in.");
+            } else {
+                // Other error
+                alert("Error creating account: " + text);
+            }
+        });
+    })
+    .catch(function (error) {
+        console.error("Sign up error:", error);
+        alert("Error creating account: " + error.message);
+    });
 }
 
-
-function isLoggedIn() {
-    var session = localStorage.getItem('sessionID');
-    return session !== null && session !== '';
-}
-
-
-
-
-
-console.log("Loading schedule"); //make sure its even running
-
-const API_BASE_URL = 'http://localhost:5000';
-
-
-
-function reset_form() {   
-    document.querySelector('#courseType').value = '';
-    document.querySelector('#courseCode').value = '';
-    document.querySelector('#courseName').value = '';
-    document.querySelector('#semester').value = '';
-    document.querySelector('#submitBtn').innerHTML = 'Submit';
-}
-
-let editID = null;
-
-
-
-
-
-// try fix
+//
 window.addEventListener('DOMContentLoaded', function() {
     console.log("Test new eventListener")
-    load_schedule();
+    
+    // Only try to create session if user is not already logged in
+    if (!isLoggedIn()) {
+        createSessionID();
+    }
+    
+    // Auto-uppercase course type field
+    const courseTypeInput = document.querySelector('#courseType');
+    if (courseTypeInput) {
+        courseTypeInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+    
     document.querySelector('#courseForm').addEventListener('submit', function(e) {
         e.preventDefault();
         // Collect form data
@@ -360,6 +413,117 @@ window.addEventListener('DOMContentLoaded', function() {
         addNewClass(classData);
     });
     document.querySelector('#reset-button')?.addEventListener('click', reset_form);
+    
+    // Connect login/logout buttons to existing functionality
+    const signUpBtn = document.querySelector('#signUpBtn');
+    const loginBtn = document.querySelector('#loginBtn');
+    const logoutBtn = document.querySelector('#logoutBtn');
+    const loginModal = document.querySelector('#loginModal');
+    const signUpModal = document.querySelector('#signUpModal');
+    const closeLoginBtn = document.querySelector('#closeLoginBtn');
+    const loginSubmitBtn = document.querySelector('#loginSubmitBtn');
+    const signUpSubmitBtn = document.querySelector('#signUpSubmitBtn');
+    
+    console.log('Debug: signUpBtn found:', signUpBtn);
+    console.log('Debug: loginBtn found:', loginBtn);
+    console.log('Debug: logoutBtn found:', logoutBtn);
+    console.log('Debug: sessionID in localStorage:', localStorage.getItem('sessionID'));
+    console.log('Debug: isLoggedIn():', isLoggedIn());
+    
+    // Clear any existing session data to start fresh
+    localStorage.removeItem('sessionID');
+    console.log('Debug: Cleared localStorage, isLoggedIn() now:', isLoggedIn());
+    
+    // Show/hide buttons based on login status
+    updateAuthUI();
+    
+    // Login button - show modal
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            loginModal.style.display = 'block';
+        });
+    }
+
+    // Sign up button - show modal
+    if (signUpBtn) {
+        signUpBtn.addEventListener('click', function() {
+            signUpModal.style.display = 'block';
+        });
+    }
+    
+    // Logout button
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('sessionID');
+            updateAuthUI();
+            alert('You have been logged out');
+            location.reload();
+        });
+    }
+    
+    // Close modal
+    if (closeLoginBtn) {
+        closeLoginBtn.addEventListener('click', function() {
+            loginModal.style.display = 'none';
+        });
+    }
+    
+    // Login form submit - use existing loginUser function
+    if (loginSubmitBtn) {
+        loginSubmitBtn.addEventListener('click', function() {
+            loginUser();
+        });
+    }
+
+    // Sign up form submit
+    if (signUpSubmitBtn) {
+        signUpSubmitBtn.addEventListener('click', function() {
+            signUpUser();
+        });
+    }
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === loginModal) {
+            loginModal.style.display = 'none';
+        }
+        if (event.target === signUpModal) {
+            signUpModal.style.display = 'none';
+        }
+    });
 });
 
-*/}
+
+function isLoggedIn() {
+    var session = localStorage.getItem('sessionID');
+    return session !== null && session !== '';
+}
+
+function updateAuthUI() {
+    const signUpBtn = document.querySelector('#signUpBtn');
+    const loginBtn = document.querySelector('#loginBtn');
+    const logoutBtn = document.querySelector('#logoutBtn');
+    const mainContent = document.querySelector('.main-content');
+    
+    if (isLoggedIn()) {
+        if (signUpBtn) signUpBtn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (mainContent) mainContent.style.display = 'block';
+        load(); // Load classes when logged in
+    } else {
+        if (signUpBtn) signUpBtn.style.display = 'inline-block';
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (mainContent) mainContent.style.display = 'none';
+    }
+}
+
+
+function reset_form() {   
+    document.querySelector('#courseType').value = '';
+    document.querySelector('#courseCode').value = '';
+    document.querySelector('#courseName').value = '';
+    document.querySelector('#semester').value = '';
+    document.querySelector('#submitBtn').innerHTML = 'Submit';
+}
