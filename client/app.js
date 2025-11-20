@@ -73,6 +73,27 @@ function createSessionID() {
     })
 }
 
+//authentication
+function loginUser() {
+    console.log("Log in here");
+    let login_email = document.querySelector("#login-email").value;
+    let login_password = document.querySelector("#login-password").value;
+    console.log(login_email, login_password);
+
+    
+
+    fetch
+
+    //set a cookie
+
+    //call load func
+
+    //catch error
+    .catch(function (error) {
+        console.log("Error during login:", error);
+    });
+}
+
 createSessionID();
 
 
@@ -126,23 +147,7 @@ function isLoggedIn() {
 }
 
 
-//authentication
-function loginUser() {
-    console.log("Log in here");
-    let login_email = document.querySelector("#login-email").value;
-    let login_password = document.querySelector("#login-password").value;
-    console.log(login_email, login_password);
 
-    
-
-    fetch
-
-    //set a cookie
-
-    //call load func
-
-    //catch error
-}
 
 
 console.log("Loading schedule"); //make sure its even running
